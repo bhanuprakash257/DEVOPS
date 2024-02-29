@@ -632,3 +632,261 @@ SLAVE:
    27  amazon-linux-extras install java-openjdk11 -y
    28  history
 
+=============================================================================================================
+SONARQUBE:
+its a tool used to check the code quality.
+it covers the bugs, vulnerabilities, code duplications, code smells.
+its supports 20+ programming langauges.
+we have both free and paid version.
+
+port: 9000
+req: t2 medium
+dependency: java-11
+
+SETUP:
+
+#! /bin/bash
+#Launch an instance with 9000 and t2.medium
+cd /opt/
+wget https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-8.9.6.50800.zip
+unzip sonarqube-8.9.6.50800.zip
+amazon-linux-extras install java-openjdk11 -y
+useradd sonar
+chown sonar:sonar sonarqube-8.9.6.50800 -R
+chmod 777 sonarqube-8.9.6.50800 -R
+su - sonar
+
+#run this on server manually
+#sh /opt/sonarqube-8.9.6.50800/bin/linux/sonar.sh start
+#echo "user=admin & password=admin"
+
+after login -- > add project -- > manual -- > project key -- > netlfix -- > setup -- > token -- > netflix -- > generate -- > continue -- > maven 
+
+copy paste the code on pipeline:
+
+pipeline {
+    agent any 
+    
+    stages{
+        stage('checkout') {
+            steps {
+                git 'https://github.com/devopsbyraham/jenkins-java-project.git'
+            }
+        }
+        stage('build') {
+            steps {
+                sh 'mvn compile'
+            }
+        }
+        stage('test') {
+            steps {
+                sh 'mvn test'
+            }
+        }
+        stage('code quality') {
+            steps {
+                sh '''
+                mvn sonar:sonar \
+                  -Dsonar.projectKey=netflix \
+                  -Dsonar.host.url=http://13.38.32.159:9000 \
+                  -Dsonar.login=3f017506d83cd334fba02ecf9db706c429ab5d38
+                '''
+            }
+        }
+        stage('artifact') {
+            steps {
+                sh 'mvn clean package'
+            }
+        }
+    }
+}
+===========================================================================================================================
+TOMCAT SETUP:
+1. wget http://dlcdn.apache.org/tomcat/tomcat-9/v9.0.80/bin/apache-tomcat-9.0.80.tar.gz
+2. tar -zxvf apache-tomcat-9.0.80.tar.gz
+3. vim apache-tomcat-9.0.80/conf/tomcat-users.xml
+
+  <role rolename="manager-gui"/>
+  <role rolename="manager-script"/>
+  <user username="tomcat" password="raham123" roles="manager-gui, manager-script"/>
+
+4. vim apache-tomcat-9.0.80/webapps/manager/META-INF/context.xml (delete 21,22)
+5. sh apache-tomcat-9.0.80/bin/startup.sh
+
+public-ip slave:8080
+manager app -- > usrername and passowd
+
+
+Logs: tail -100f /root/apache-tomcat-9.0.80/logs/catalina.out
+Port Changing:  vim /root/apache-tomcat-9.0.80/conf/server.xml
+line 69: 8080=8090 -- > save -- > shutdown and start the tomcat using scripts
+
+
+
+
+Download pluguin -- > Deploy to container : this is to deploy on tomcat
+
+
+Dashboard
+Manage Jenkins
+Credentials
+System
+Global credentials (unrestricted)
+add credentials -- > username and password -- > save
+
+http://13.39.49.204:8080/netflix/
+
+TROUBLESHOOTING TECHNIQUES:
+1. SERVER LEVEL
+2. JOB LEVEL
+3. CODE LEVEL
+
+1. SERVER LEVEL:
+A. CONSOLE OP
+B. MAVEN & JAVA
+C. DEPENDENCY MISTAKE 
+D. CPU & MEMEORY
+
+2. JOB LEVEL:
+A. REPO AND BRANCH CONFIG
+B. SYNTAX
+C. PLUGINS
+
+
+vim /root/apache-tomcat-9.0.80/conf/server.xml
+sh /root/apache-tomcat-9.0.80/bin/startup.sh
+sh /root/apache-tomcat-9.0.80/bin/shutdown.sh
+
+pipeline {
+    agent {
+        label 'slave1'
+    }
+    
+    stages {
+        stage('checkout') {
+            steps {
+                git 'https://github.com/devopsbyraham/jenkins-java-project.git'
+            }
+        }
+        stage('build') {
+            steps {
+                sh 'mvn compile'
+            }
+        }
+        stage('test') {
+            steps {
+                sh 'mvn test'
+            }
+        }
+        stage('code quality') {
+            steps {
+                sh '''
+                   mvn sonar:sonar \
+                     -Dsonar.projectKey=project-netflix \
+                     -Dsonar.host.url=http://52.47.193.26:9000 \
+                     -Dsonar.login=54f6a0567ef5a12acda5eecee7ce51e0feb16bb1
+                '''
+            }
+        }
+        stage('artifact') {
+            steps {
+                sh 'mvn clean package'
+            }
+        }
+        stage('deploy') {
+            steps {
+                deploy adapters:[
+                    tomcat9(
+                        credentialsId: 'a3f384b0-0de7-4b62-9800-24043d1d135d',
+                        path: '',
+                        url: 'http://13.39.49.204:8080/'
+                        )
+                    ],
+                    contextPath: 'netflix',
+                    war: 'target/*.war'
+            }
+        }
+    }
+}
+====================================================================================================
+
+pipeline {
+   agent any
+   
+       parameters {
+           choice(name: 'server', choices: ['a','b','c'], description: "")       }
+   stages {
+       stage('parameters') {
+           steps {
+               echo 'this is my prod stage'
+           }
+       }
+   }
+}
+
+
+
+pipeline {
+   agent any
+       parameters {
+           booleanParam(name: 'db', defaultValue: true, description: "")
+       }
+   stages {
+       stage('parameters') {
+           steps {
+               echo 'this isn my prod stage'
+           }
+       }
+   }
+}
+
+pipeline {
+   agent any
+    environment {
+           name = 'raham'
+       }
+       parameters {
+           string(name: 'person', defaultValue: 'raham shaik', description: "how are you")
+       }
+   stages {
+       stage('parameters') {
+           steps {
+               sh 'echo "${name}"'
+               sh 'echo "${person}"'
+           }
+       }
+   }
+}
+===================================================================================================================================================
+RBAC	: ROLE BASED ACCESS CONTROL
+To restrict the jenkins Control for the users.
+authentication - who can signin
+authorization - who can work
+
+user-1: EXP (rajesh)           user-2:FRESHER (raju)	USER-3: FRESHER
+
+1. USERS: Dashboard -- > Manage Jenkins -- > security -- > Users (crearte 2 users)
+2. PLUGIN: Dashboard -- > Manage Jenkins -- > Plugins -- > Available plugins -- > Role-based Authorization Strategy  -- > install -- > goback to top
+3. Dashboard  -- > Manage Jenkins -- > Security -- > Authorization: Role-Based strategy
+4. ROLES : Dashboard  -- > Manage Jenkins -- > Security -- > Manage and Assign Roles -- >
+   create Fresher & Experience roles and give permissions(EXP: ADMIN, FRE: BUILD AND READ)
+5. ASSIGN ROLES: user-1: EXP           user-2:FRESHER
+=======================================================================================================================
+
+LIST VIEW: USED TO SEPERATE/FILTER THE JOBS.
+MY VIEW: USED TO SHOW THE JOBS WHICH I HAVE PERMISSIONS.
+BUILD PIPELINE VIEW: To show the process of linked jobs -- > PLUGINS -- > AVAILABLE -- > Build Pipeline -- > INSTALL
+
+
+
+#JENKINS BACKUP:
+
+Dashboard
+Manage Jenkins
+Plugins
+available plugins 
+Periodic Backup
+install
+
+CONFIGURE BACKUP:
+manage jenkins -- > Pereodic backup manager -- > configure now -- >
