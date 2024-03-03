@@ -922,4 +922,158 @@ ansible-galaxy install artemv.java
 ansible-galaxy search --author artemv
 
 
+============================================================================================================================
+
+INVENTORY HOST PATTERN:
+
+ansible all --list-hosts          # shows all the servers
+ansible all[1] --list-hosts       # shows the 2nd server of all 
+ansible dev --list-hosts          # shows the dev server only
+ansible test --list-hosts         # shows the test server only
+ansible test[1] --list-hosts      # shows the test 2nd server only
+ansible all[1:3] --list-hosts     # shows server 2 to server 4
+ansible all[-1] --list-hosts      # shows the last server
+ansible all[-3] --list-hosts      # shows the last 3rd server
+
+STOPPING FACTS:
+
+- hosts: all
+  gather_facts: false
+  vars:
+    a: git
+    b: maven
+  tasks:
+    - name: task-1
+      yum: name={{a}} state=present
+      yum: name={{b}} state=present
+
+Redhat: yum/rpm
+Ubuntu: apt/apt-get
+Python: pip module
+
+Numpy & Pandas -- > libs 
+
+ansible all -a "yum install pip -y"
+
+
+- hosts: all
+  tasks:
+    - name: task-1
+      pip:
+        name: NumPy
+
+- hosts: all
+  tasks:
+    - name: task-1
+      pip:
+        name: Pandas
+
+COPY MODULE:
+ansible all -m copy -a "src=app.yml dest=/tmp"
+
+- hosts: all
+  tasks:
+    - name: copying the file
+      copy: src=app.yml dest=/root
+
+color pattren:
+
+YELLOW	: SUCCESSFUL
+RED	: FAILED
+GREEN	: ALREADY DONE
+BLUE	: SKIPPED
+
+SINGLE TAG: ansible-playbook raham.yml --tags c
+MULTI TAGS: ansible-playbook raham.yml --tags a,b
+SKIP TAGS: ansible-playbook raham.yml --skip-tags "c"
+MULTI SKIP TAGS: SKIP TAGS: ansible-playbook raham.yml --skip-tags "b,c"
+
+ansible_hostname
+ansible_memfree_mb
+ansible_memtotal_mb
+ansible_os_family
+ansible_pkg_mgr
+ansible_processor_vcpus
+
+
+Debug: used to print the msgs/customize ops
+
+- hosts: all
+  tasks:
+    - name: to pring mgs
+      debug:
+        msg: "the node name os: {{ansible_hostname}}, the total mem is: {{ansible_memtotal_mb}}, free mem is {{ansible_memfree_mb}}, the flavour of ec2 is: {{ansible_os_family}}, toto cpus is: {{ansible_processor_vcpus}}"
+
+JINJA2 TEMPLATE: used to get the customized op, here its a text file which can extract the variables and these values will change as per time.'
+
+LOOKUPS: this module used to get data from files, db and key-values
+
+
+- hosts: dev
+  vars:
+    a: "{{lookup('file', '/root/creds.txt') }}"
+  tasks:
+    - debug:
+        msg: "hai my user name is {{a}}"
+
+cat creds.txt
+user=raham
+
+STRATAGIES:
+
+LINEAR: execute tasks sequencially
+FREE: execute all tasks on all node at same time
+ROLLING:
+SEQUENC:
+BATCH:
+
+ hosts: dev
+  gather_facts: false
+  strategy: free
+  vars:
+    a: "{{lookup('file', '/root/creds.txt') }}"
+  tasks:
+    - debug:
+        msg: "hai my user name is {{a}}"
+
+=============================================================================
+
+LAMP:
+L : LINUX
+A : APACHE
+M : MYSQL
+P : PHP
+
+
+
+---
+- hosts: all
+  tasks:
+    - name: installing apache
+      yum: name=httpd state=present
+    - name: installing mysql
+      yum: name=mysql state=present
+    - name: installing python
+      yum: name=python3 state=present
+
+
+ASYNCHRONOUS ACTIONS & POLLING:
+we use this for restricting the task for particular time
+within in the requested time only the task need to be complete
+if it takes more than requested time task will be failed
+
+
+- hosts: all
+  tasks:
+    - name: install git
+      command: sleep 40
+      async: 30
+      poll: 10
+
+    - name: install maven
+      yum: name=maven state=present
+
+
+
+
 
