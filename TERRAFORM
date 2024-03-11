@@ -977,8 +977,34 @@ variable "bucket_name" {
 type = string
 }
 
+ vim  main.tf
+   55  vim main.tf
+   56  vim provider.tf
+   57  cat main.tf
+   58  mkdir -p modules/instances
+   59  mkdir -p modules/buckets
+   60  yum install tree -y
+   61  tree
+   62  cat main.tf
+   63  vim modules/instances/main.tf
+   64  vim modules/instances/variable.tf
+   65  tree
+   66  cat main.tf
+   67  vim modules/buckets/main.tf
+   68  vim modules/buckets/variable.tf
+   69  tree
+   70  terraform apply --auto-approve
+   71  terraform init
+   72  terraform apply --auto-approve
+   73  terraform state list
+   74  terraform destroy --auto-approve
+   75  history
 
 
+
+AWS - CFT
+AZURE - ARM
+GCP - GDE
 
 
 
