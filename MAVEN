@@ -86,6 +86,12 @@ yum install tree -y
 WORKING WITH PROJECT:
 mvn archetype:generate	: To generate the project structure
 
+mvn archetype:generate -DgroupId=com.example -DartifactId=my-app -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false
+-DgroupId: The package name of the project (e.g., com.example).
+-DartifactId: The project name (e.g., my-app).
+-DarchetypeArtifactId: The archetype to use (maven-archetype-quickstart is a basic Java project template).
+-DinteractiveMode=false: Skips the interactive prompts and uses the provided values.
+
 Define value for property 'groupId': raham
 Define value for property 'artifactId': swiggy
 Define value for property 'version' 1.0-SNAPSHOT: :
