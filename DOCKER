@@ -742,5 +742,22 @@ docker inspect cont3
 docker stats
 docker top cont3
 
+RESOURE MANAGEMENT OF DOCKER:
 
+67  docker images
+   68  docker run -itd --name cont1 amazonlinux:latest
+   69  docker inspect cont1
+   70  docker run -itd --name cont2 --cpus="0.5" amazonlinux:latest
+   71  docker inspect cont2
+   72  docker run -itd --name cont3 --cpus="0.6" amazonlinux:latest
+   73  docker run -itd --name cont4 --cpus="0.7" amazonlinux:latest
+   74  docker inspect cont4 | grep -i nanocpus
+   75  docker run -itd --name cont5 --memory="512mb" amazonlinux:latest
+   76  docker inspect cont5
+   77  docker run -itd --name cont raham --cpus="0.6" --memory="512mb" amazonlinux:latest
+   78  docker run -itd --name  raham --cpus="0.6" --memory="512mb" amazonlinux:latest
+   79  docker inspect raham
+   80  docker stats
+   81  docker stats --format "table {{.Container}}\t{{.MemUsage}}"
+   82  history
 
