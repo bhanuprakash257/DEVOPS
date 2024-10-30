@@ -715,7 +715,16 @@ minikube addons list  : : it will be enabled
 kubectl get ns
 kubectl get po
 kubectl get deploy -n ingress-nginx
-but in cloud it will enabled automaticcaly
+but in cloud it will enabled automaticcaly    
+
+
+{Step 1: Install an Ingress Controller
+Nginx Ingress Controller is popular and easy to install using Kubernetes manifests or Helm charts.
+
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/cloud/deploy.yaml
+This command will deploy an Nginx Ingress controller in your cluster. You can verify it with:
+
+kubectl get pods -n ingress-nginx }
 
 vim pod.yml
 apiVersion: v1
