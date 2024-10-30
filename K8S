@@ -1,6 +1,12 @@
 DAY-01
 
 K8S:
+IT is an open-source container orchestration platform.
+It is used to automates many of the manual processes like deploying, managing, and scaling containerized applications.
+Kubernetes was developed by GOOGLE using GO Language.
+Google donated K8's to CNCF in 2014.
+1st version was released in 2015.
+
 
 ARCHITECTURE:
 CLUSTER
@@ -23,17 +29,18 @@ kubeproxy: deals with networking of pods in cluster.
 pods: group of containers.
 container engine: creates containers
 
-TYPES OF K8S CLUSTER:
-1. SELF MANAGED:
-A. KOPS
-B. KUBEADM
-C. MINIKUBE
+CLUSTER:
+1. SELF MANAGED: WE NEED TO CREATE & MANAGE THEM
 
+minikube = single node cluster
+kubeadm = multi node cluster (manual)
+kops = multi node cluster (automation)
 
-2. CLOUD MANAGED:
-A. AKS
-B. GKS
-C. EKS
+2. CLOUD BASED: CLOUD PROVIDERS WILL MANAGE THEM
+
+AWS = EKS = ELASTIC KUBERNETES SERVICE
+AZURE = AKS = AZURE KUBERENETS SERVICE
+GOOGLE = GKS = GOOGLE KUBERENETS SERVICE
 
 
 MINIKUBE:
@@ -889,3 +896,171 @@ HISTORY:
    80  docker stats
    81  docker stats --format "table {{.Container}}\t{{.MemUsage}}"
    82  history
+=========================================================================================================
+  
+CONFIGMAPS & SECRETS
+  
+ENV VARS: used to define a vlaue.
+LEVEL:
+CONTAINER LEVEL
+POD LEVEL
+DEPLOYMENT LEVEL
+
+
+METHODS TO DEFINE:
+1. MANIFEST FILE
+2. CONFIGMAPS
+3. SECRETS
+
+CONFIGMAP:
+
+Used to store data in key-value, files or CLI used by pods, container etc---
+data is not encrypted, if we want encrypt we need to use secrets.
+limit is 1 MB, to store more than 1 MB mount the volume seperately.
+
+
+1. key-value:
+
+cat configmap.yml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: swiggycm
+data:
+  tomcat_url: "https://192.16.100.10:8080"
+  db_url: "https://192.16.100.10:5432"
+
+cat pod.yml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: swiggy
+spec:
+  containers:
+    - name: swiggy-cont1
+      image: nginx
+      envFrom:
+        - configMapRef:
+            name: swiggycm
+
+kubectl apply -f configmap.yml
+kubectl apply -f pod.yml
+kubectl describe cm swiggycm
+kubectl describe pod swiggy
+
+
+2. CLI:
+
+kubectl create deploy swiggydb --image=mariadb
+kubectl get pods
+kubectl create deploy swiggydb --image=mariadb
+kubectl logs swiggydb-5d49dc56-cbbqk
+kubectl set env deploy swiggydb MYSQL_ROOT_PASSWORD=Raham123 
+kubectl get pods
+
+3. FILE
+
+vim varsfile
+MYSQL_ROOT_PASSWORD=Raham123
+MYSQL_USER=admin
+
+kubectl create cm dbvars --from-env-file=varsfile
+kubectl describe cm dbvars
+kubectl get deploy 
+kubectl delete deploy swiggydb
+kubectl create deploy swiggydb --image=mariadb 
+kubectl get pods
+kubectl get cm
+kubectl set env deploy swiggydb --from=configmap/dbvars
+kubectl get pods
+kubectl edit deploy swiggydb
+
+SECRETS:
+
+To store sensitive data in an unencrypted format like passwords, ssh-keys etc ---
+it uses base64 encoded format
+Designed to prevent  exposure or unauthorized access to sensitive information within the cluster.
+Both secrets and Config maps are used outside of deployment
+config maps cannot encode but secrets will encode the data
+password=raham (now we can encode and ecode the value)
+
+
+K8s supports different types of secrets:
+Generic: Generic secrets allow you to store arbitrary key-value pairs.
+TLS: To store TLS certificates for securing communication between services.
+Docker-registry: Docker-registry secrets are used for storing credentials required to authenticate with private Docker registries.
+SSH: To store SSH private keys, used for secure access to external resources.
+
+
+kubectl get secret
+kubectl create secret generic password --from-literal=ROOT_PASSWORD=raham123
+kubectl get secrets
+kubectl get secrets password -o yaml
+echo "cmFoYW0xMjM=" | base64 --decode
+echo "cmFoYW0xMjM=" | base64 -d
+
+HISTORY:
+
+ 1  vim kops.sh
+    2  vim .bashrc
+    3  source .bashrc
+    4  sh kops.sh
+    5  vim .aws/credentials
+    6  sh kops.sh
+    7  kubectl get no
+    8  kops get cluster
+    9  cat kops.sh
+   10  export KOPS_STATE_STORE=s3://viratkohli77.k8s.local
+   11  cat kops.sh
+   12  kops get cluster
+   13  kubectl get no
+   14  vim abc.yml
+   15  kubectl apply -f abc.yml
+   16  kubectl get deploy
+   17  kubectl get svc
+   18  kubectl delete -f abc.yml
+   19  vim abc.yml
+   20  kubectl apply -f abc.yml
+   21  kubectl get svc,deploy
+   22  kubectl get po -o wide
+   23  vim abc.yml
+   24  kubectl apply -f abc.yml
+   25  kubectl get svc,deploy
+   26  kubectl delete -f abc.yml
+   27  vim abc.yml
+   28  kubectl apply -f abc.yml
+   29  kubectl get svc,deploy
+   30  kubectl delete -f abc.yml
+   31  rm -rf *
+   32  vim configmap.yml
+   33  vim pod.yml
+   34  kubectl apply -f configmap.yml
+   35  kubectl apply -f pod.yml
+   36  kubectl get po
+   37  kubectl describe pod swiggy
+   38  kubectl api-resources
+   39  kubectl api-resources | grep -i cm
+   40  kubectl get cm
+   41  kubectl describe cm swiggycm
+   42  kubectl create deploy swiggydb --image=mariadb
+   43  kubectl get deploy
+   44  kubectl get po
+   45  kubectl logs swiggydb-6b66f8997f-vbhmg
+   46  kubectl set env deploy swiggydb MYSQL_ROOT_PASSWORD=Raham123
+   47  kubectl get po
+   48  vim varsfile
+   49  kubectl create cm dbvars --from-env-file=varsfile
+   50  kubectl get cm
+   51  kubectl create deploy swiggydb --image=mariadb
+   52  kubectl delete pod swiggydb
+   53  kubectl delete deploy swiggydb
+   54  kubectl create deploy swiggydb --image=mariadb
+   55  kubectl get po
+   56  kubectl set env deploy swiggydb --from=configmap/dbvars
+   57  kubectl get po
+   58  kubectl get secret
+   59  kubectl create secret generic password --from-literal=ROOT_PASSWORD=raham123
+   60  kubectl get secrets
+   61  kubectl get secrets password -o yaml
+   62  echo "cmFoYW0xMjM=" | base64 --decode
+   63  history
