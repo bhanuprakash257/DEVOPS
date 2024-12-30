@@ -147,6 +147,26 @@ CRONJOB: it will do scheduled works. it follows cron syntax
 *	: day (0=sunday, 1=monday -------)
 do ci job -- > Build Triggers -- > Build periodically -- > */1 * 29 7 6 -- > save
 
+Cron Syntax for Jenkins
+
+The cron schedule follows the format:
+MINUTES HOURS DAY_OF_MONTH MONTH DAY_OF_WEEK
+
+Fields:
+Field	Allowed Values	Description
+MINUTES	0-59	Minute of the hour
+HOURS	0-23	Hour of the day
+DAY_OF_MONTH	1-31	Day of the month
+MONTH	1-12 or JAN-DEC	Month of the year
+DAY_OF_WEEK	0-7 (Sunday = 0 or 7) or SUN-SAT	Day of the week
+
+Special Characters:
+*: Matches all values.
+,: Separates multiple values (e.g., 0,15,30).
+-: Specifies a range (e.g., 1-5 for Monday to Friday).
+/: Specifies intervals (e.g., */5 for every 5 minutes).
+
+
 DRAWBACK: It will do given work, it will not check changes.
 
 POLL SCM: it will make a build in given time when dev commit the code.
